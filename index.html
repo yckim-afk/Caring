@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<!-- saved from url=(0081)file:///C:/Users/%EA%B9%80%EC%9C%A4%EC%B1%84/Downloads/ai_studio_code%20(41).html -->
+<html lang="ko"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>돌봄 - 나를 위한 부드러운 연결</title>
+    <style>
+        :root {
+            /* 부드럽고 편안한 파스텔/뉴트럴 팔레트 */
+            --bg-color: #f8f9f6;
+            --card-bg: #ffffff;
+            --text-main: #3a3a3a;
+            --text-sub: #767676;
+            --accent-soft: #e2eadd;
+            --accent-border: #d1d9cc;
+            --button-active: #c8d1c2;
+            --transition-speed: 0.25s;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            /* iPad Safe Area 대응 */
+            padding-top: env(safe-area-inset-top);
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        #app-container {
+            width: 100%;
+            max-width: 600px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            flex-grow: 1;
+        }
+
+        /* 헤더 및 통찰 메시지 */
+        header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            font-weight: 300;
+            font-size: 1.5rem;
+            letter-spacing: -0.02em;
+            margin: 0;
+            color: var(--text-sub);
+        }
+
+        .insight-text {
+            font-size: 0.85rem;
+            color: var(--text-sub);
+            margin-top: 8px;
+            min-height: 1.2rem;
+        }
+
+        /* 피드백 카드 */
+        #feedback-card {
+            background: var(--accent-soft);
+            padding: 16px;
+            border-radius: 16px;
+            margin-bottom: 10px;
+            animation: fadeIn var(--transition-speed);
+            position: relative;
+        }
+
+        .feedback-title {
+            font-size: 1rem;
+            margin-bottom: 12px;
+            padding-right: 24px;
+        }
+
+        .feedback-close {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--text-sub);
+        }
+
+        .feedback-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* 공통 버튼 스타일 */
+        button {
+            border: 1px solid var(--accent-border);
+            background: var(--card-bg);
+            color: var(--text-main);
+            border-radius: 12px;
+            padding: 16px;
+            font-size: 1.05rem;
+            cursor: pointer;
+            transition: background var(--transition-speed), transform 0.1s;
+            /* 터치 타겟 최소 44px 이상 */
+            min-height: 56px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+
+        button:active {
+            background: var(--button-active);
+            transform: scale(0.98);
+        }
+
+        /* 메인 그리드 레이아웃 */
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .full-width {
+            grid-column: span 2;
+        }
+
+        /* 단계별 화면 전환 애니메이션 */
+        .step-view {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+            animation: fadeIn var(--transition-speed);
+        }
+
+        .step-view.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 500;
+            margin-bottom: 10px;
+            word-break: keep-all;
+        }
+
+        .ack-text {
+            font-size: 1.2rem;
+            color: var(--text-main);
+            background: var(--accent-soft);
+            padding: 20px;
+            border-radius: 16px;
+            margin-bottom: 10px;
+            word-break: keep-all;
+        }
+
+        .back-btn {
+            border: none;
+            background: none;
+            color: var(--text-sub);
+            text-decoration: underline;
+            font-size: 0.9rem;
+            min-height: 44px;
+            margin-top: 20px;
+        }
+
+        /* 설정 메뉴 */
+        footer {
+            margin-top: auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .reset-btn {
+            font-size: 0.75rem;
+            color: #ccc;
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* 반응형 대응 (모바일 세로) */
+        @media (max-width: 480px) {
+            .button-grid {
+                grid-template-columns: 1fr;
+            }
+            .full-width {
+                grid-column: span 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div id="app-container">
+    <header>
+        <h1>돌봄</h1>
+        <div id="insight-area" class="insight-text"></div>
+    </header>
+
+    <!-- 피드백 영역 -->
+    <div id="feedback-area"></div>
+
+    <!-- 1단계: 메인 화면 -->
+    <div id="step1" class="step-view active">
+        <div class="question-text">지금 어떤 상황인가요?</div>
+        <div class="button-grid">
+            <button onclick="goToStep2(&#39;work&#39;)">공부/일 중</button>
+            <button onclick="goToStep2(&#39;rest&#39;)">쉬는 중</button>
+            <button onclick="goToStep2(&#39;hard&#39;)">그냥 힘듦</button>
+            <button onclick="goToStep2(&#39;unknown&#39;)">잘 모르겠음</button>
+        </div>
+    </div>
+
+    <!-- 2단계: 상세 선택 -->
+    <div id="step2" class="step-view">
+        <div id="step2-question" class="question-text">지금 머리가 얼마나 꽉 찬 느낌이에요?</div>
+        <div id="step2-buttons" class="button-grid"><button>가벼움</button><button>적당함</button><button>빡빡함</button><button>터질 것 같음</button></div>
+        <button class="back-btn" onclick="goBack(1)">뒤로가기</button>
+    </div>
+
+    <!-- 3단계: 인정 및 제안 -->
+    <div id="step3" class="step-view">
+        <div id="step3-ack" class="ack-text">생각이 조금씩 엉키기 시작했군요.</div>
+        <div id="step3-buttons" class="button-grid"><button class="full-width">심호흡을 크게 세 번만 해보는 건 어떨까요?</button><button class="full-width">창 밖을 1분만 멍하니 바라보는 건요?</button></div>
+        <button class="back-btn" onclick="goBack(2)">상태 다시 고르기</button>
+    </div>
+</div>
+
+<footer>
+    <button class="reset-btn" onclick="resetApp()">초기화</button>
+</footer>
+
+<script>
+    // --- 데이터 및 상태 정의 ---
+    let currentState = {
+        context: null,
+        state: null,
+        step: 1
+    };
+
+    const suggestionData = {
+        'work': {
+            question: "지금 머리가 얼마나 꽉 찬 느낌이에요?",
+            options: {
+                '가벼움': { ack: "순조롭게 잘 하고 계시네요.", suggestions: ["이 리듬을 잠시 즐겨보는 건 어떨까요?", "지금 딱 물 한 잔 마시고 오는 건요?"] },
+                '적당함': { ack: "몰입이 시작되려는 참인가 봐요.", suggestions: ["어깨 한 번만 으쓱하고 다시 시작할까요?", "지금 하는 걸 30분만 더 집중해볼까요?"] },
+                '빡빡함': { ack: "생각이 조금씩 엉키기 시작했군요.", suggestions: ["심호흡을 크게 세 번만 해보는 건 어떨까요?", "창 밖을 1분만 멍하니 바라보는 건요?"] },
+                '터질 것 같음': { ack: "지금 과부하가 온 상태인 것 같아요.", suggestions: ["내용이 너무 어려운가요? 작게 쪼개서 다시 봐요.", "일단 눈을 감고 3분만 가만히 있어볼까요?"] }
+            }
+        },
+        'rest': {
+            question: "지금 어떤 느낌에 가까워요?",
+            options: {
+                '잘 쉬어짐': { ack: "충전을 잘 하고 계셔서 다행이에요.", suggestions: ["이 고요함을 온전히 느껴보세요.", "좋아하는 음악을 한 곡 틀어볼까요?"] },
+                '뭔가 불편함': { ack: "몸이 긴장을 다 풀지 못한 것 같네요.", suggestions: ["담요를 덮거나 실내 온도를 조절해볼까요?", "자세를 조금 바꿔보는 건 어떨까요?"] },
+                '죄책감이 듦': { ack: "쉬는 중에도 마음은 바쁘게 움직이고 있군요.", suggestions: ["지금 이 휴식도 성장의 일부예요.", "잠시 휴대폰을 멀리 두는 건 어떨까요?"] }
+            }
+        },
+        'hard': {
+            question: "어떤 느낌에 가까워요?",
+            options: {
+                '우울함': { ack: "마음이 많이 가라앉아 있군요. 그럴 수 있어요.", suggestions: ["따뜻한 물 한 잔 마셔보는 건 어떨까요?", "포근한 이불 속으로 들어가는 건요?"] },
+                '불안함': { ack: "무언가 당신을 재촉하고 있는 것 같네요.", suggestions: ["발바닥이 바닥에 닿는 감각에 집중해볼까요?", "지금 할 수 있는 아주 작은 일 하나만 정해봐요."] },
+                '무기력함': { ack: "에너지가 아주 많이 소진된 상태인가 봐요.", suggestions: ["아무것도 안 해도 괜찮아요. 그냥 누워 있을까요?", "손가락 발가락만 까닥까닥 움직여볼까요?"] },
+                '짜증남': { ack: "마음의 여유가 한계에 다다랐나 보네요.", suggestions: ["크게 소리를 내서 숨을 내뱉어볼까요?", "손을 시원한 물에 씻고 오는 건 어떨까요?"] }
+            }
+        },
+        'unknown': {
+            question: "몸의 신호에 귀를 기울여볼까요?",
+            options: {
+                '배고픔': { ack: "몸이 에너지를 필요로 하고 있네요.", suggestions: ["간단하게 먹을 수 있는 게 있을까요?", "정식으로 식사 시간을 가져보는 건요?"] },
+                '졸림': { ack: "눈꺼풀이 많이 무거워졌군요.", suggestions: ["15분만 짧게 낮잠을 자는 건 어떨까요?", "세수를 시원하게 하고 올까요?"] },
+                '목마름': { ack: "몸에 수분이 필요한 상태예요.", suggestions: ["시원한 물을 한 컵 마셔볼까요?", "좋아하는 차를 우려보는 건 어떨까요?"] },
+                '답답함': { ack: "환기가 필요한 순간인 것 같아요.", suggestions: ["창문을 열어 신선한 공기를 마셔볼까요?", "잠시 자리에서 일어나 기지개를 켜봐요."] }
+            }
+        }
+    };
+
+    const contextMap = { 'work': '공부/일 중', 'rest': '쉬는 중', 'hard': '그냥 힘듦', 'unknown': '잘 모르겠음' };
+
+    // --- 초기화 로직 ---
+    window.onload = () => {
+        checkFeedback();
+        showInsight();
+    };
+
+    function getHistory() {
+        return JSON.parse(localStorage.getItem('care_history') || '{"history": []}');
+    }
+
+    function saveHistory(entry) {
+        const data = getHistory();
+        data.history.push(entry);
+        localStorage.setItem('care_history', JSON.stringify(data));
+    }
+
+    // --- 네비게이션 ---
+    function goToStep2(context) {
+        currentState.context = context;
+        currentState.step = 2;
+        
+        const config = suggestionData[context];
+        document.getElementById('step2-question').innerText = config.question;
+        
+        const btnContainer = document.getElementById('step2-buttons');
+        btnContainer.innerHTML = '';
+        
+        Object.keys(config.options).forEach(state => {
+            const btn = document.createElement('button');
+            btn.innerText = state;
+            btn.onclick = () => goToStep3(state);
+            btnContainer.appendChild(btn);
+        });
+
+        switchView(2);
+    }
+
+    function goToStep3(state) {
+        currentState.state = state;
+        currentState.step = 3;
+
+        const config = suggestionData[currentState.context].options[state];
+        document.getElementById('step3-ack').innerText = config.ack;
+        
+        const btnContainer = document.getElementById('step3-buttons');
+        btnContainer.innerHTML = '';
+
+        // 로컬 저장소 확인: 이전에 이 상태에서 '도움됨'이었던 제안이 있는지 확인
+        const history = getHistory().history;
+        const previousPositive = history.find(h => h.context === contextMap[currentState.context] && h.state === state && h.feedback === '도움됨');
+        
+        let finalSuggestions = [...config.suggestions];
+        if (previousPositive) {
+            // 도움이 되었던 제안을 맨 앞으로 (중복 제거 후)
+            finalSuggestions = [previousPositive.suggestionText, ...finalSuggestions.filter(s => s !== previousPositive.suggestionText)];
+        }
+
+        finalSuggestions.slice(0, 2).forEach(sText => {
+            const btn = document.createElement('button');
+            btn.innerText = sText;
+            btn.className = 'full-width';
+            btn.onclick = () => selectSuggestion(sText);
+            btnContainer.appendChild(btn);
+        });
+
+        switchView(3);
+    }
+
+    function selectSuggestion(text) {
+        const entry = {
+            timestamp: new Date().toISOString(),
+            context: contextMap[currentState.context],
+            state: currentState.state,
+            suggestionId: btoa(text).substring(0, 8),
+            suggestionText: text,
+            feedback: null
+        };
+        saveHistory(entry);
+        
+        // 완료 메시지
+        alert("제안을 마음 속에 담아두고, 천천히 시도해보세요.");
+        location.reload();
+    }
+
+    function goBack(step) {
+        if (step === 1) {
+            switchView(1);
+        } else if (step === 2) {
+            goToStep2(currentState.context);
+        }
+    }
+
+    function switchView(step) {
+        document.querySelectorAll('.step-view').forEach(view => view.classList.remove('active'));
+        document.getElementById(`step${step}`).classList.add('active');
+    }
+
+    // --- 피드백 및 통찰 ---
+    function checkFeedback() {
+        const data = getHistory();
+        const lastEntry = data.history[data.history.length - 1];
+        
+        if (lastEntry && lastEntry.feedback === null) {
+            const area = document.getElementById('feedback-area');
+            area.innerHTML = `
+                <div id="feedback-card">
+                    <button class="feedback-close" onclick="closeFeedback()">×</button>
+                    <div class="feedback-title">저번에 제안한 <b>"${lastEntry.suggestionText}"</b>,<br>도움이 됐나요?</div>
+                    <div class="feedback-buttons">
+                        <button onclick="submitFeedback('도움됨')">도움됨</button>
+                        <button onclick="submitFeedback('별로')">별로</button>
+                        <button onclick="submitFeedback('모름')">모름</button>
+                    </div>
+                </div>
+            `;
+        }
+    }
+
+    function submitFeedback(val) {
+        const data = getHistory();
+        for (let i = data.history.length - 1; i >= 0; i--) {
+            if (data.history[i].feedback === null) {
+                data.history[i].feedback = val;
+                break;
+            }
+        }
+        localStorage.setItem('care_history', JSON.stringify(data));
+        closeFeedback();
+    }
+
+    function closeFeedback() {
+        document.getElementById('feedback-area').innerHTML = '';
+    }
+
+    function showInsight() {
+        const data = getHistory();
+        const history = data.history;
+        if (history.length < 3) return;
+
+        // 최근 24시간 내 빈번한 상태 체크
+        const counts = {};
+        const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000);
+        
+        history.filter(h => new Date(h.timestamp) > yesterday)
+               .forEach(h => { counts[h.state] = (counts[h.state] || 0) + 1; });
+
+        const topState = Object.entries(counts).sort((a,b) => b[1] - a[1])[0];
+        
+        if (topState && topState[1] >= 2) {
+            document.getElementById('insight-area').innerText = `요즘 '${topState[0]}' 상태를 자주 느끼고 계시네요.`;
+        }
+    }
+
+    function resetApp() {
+        if(confirm("모든 기록을 삭제할까요?")) {
+            localStorage.clear();
+            location.reload();
+        }
+    }
+</script>
+
+
+</body></html>
